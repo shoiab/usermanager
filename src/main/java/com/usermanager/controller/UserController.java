@@ -46,12 +46,15 @@ public class UserController {
 
 	@RequestMapping(value = "/changePassword", method = RequestMethod.POST)
 	public @ResponseBody JSONObject changePassword(
-			@RequestBody JSONObject requestjson)
+			@RequestHeader(value = "auth_key") String auth_key,
+			@RequestParam(value = "email") String email,
+			@RequestParam(value = "newPassword") String newPassword)
 			throws NoSuchAlgorithmException, ParseException {
+		
 		UserModel usermodel = new UserModel();
-		usermodel.setEmail(requestjson.get("email").toString());
-		usermodel.setPassword(requestjson.get("newPassword").toString());
-		return dataservice.changePassword(usermodel, requestjson.get("auth_key").toString());
+		usermodel.setEmail(email);
+		usermodel.setPassword(newPassword);
+		return dataservice.changePassword(usermodel, auth_key);
 	}
 
 	@RequestMapping(value = "/getuserfromcache", method = RequestMethod.POST)

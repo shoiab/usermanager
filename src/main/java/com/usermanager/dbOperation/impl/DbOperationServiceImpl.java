@@ -16,9 +16,7 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.util.JSON;
 import com.usermanager.dbOperation.DbOperationService;
-import com.usermanger.model.GroupModel;
 import com.usermanger.model.TagModel;
-import com.usermanger.model.TaskModel;
 import com.usermanger.model.UserModel;
 
 @Service
