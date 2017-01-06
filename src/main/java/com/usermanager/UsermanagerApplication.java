@@ -15,6 +15,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.GenericToStringSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.client.RestTemplate;
 
 import com.mongodb.MongoClient;
 
@@ -76,5 +77,10 @@ public class UsermanagerApplication {
 		template.setValueSerializer(new GenericToStringSerializer<Object>(
 				Object.class));
 		return template;
+	}
+	
+	@Bean
+	public RestTemplate restTemplate() {
+	    return new RestTemplate();
 	}
 }

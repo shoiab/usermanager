@@ -1,12 +1,14 @@
 package com.usermanager.solr.impl;
 
 import java.io.IOException;
+import java.util.Map;
 
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrRequest.METHOD;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.impl.HttpSolrClient;
 import org.apache.solr.client.solrj.response.QueryResponse;
+import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrInputDocument;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,14 +50,14 @@ public class SearchManagerImpl implements SearchHandler {
 
 		SolrDocumentList docsans = new SolrDocumentList();
 		SolrQuery solrQuery = new SolrQuery();
-		solrQuery.setQuery(searchVal + "*");
-		solrQuery
-				.setQuery("(tagValue:(" + "*" + searchVal + "*" + ") AND "
-						+ "tagType:(" + searchField + ")) OR " + "(tagName:("
-						+ "*" + searchVal + "*" + ") AND " + "tagType:("
-						+ searchField + "))");
-		solrQuery.setFields("tagName", "tagType", "tagValue");
-		//solrQuery.setFields("tagName","tagValue");
+		// solrQuery.setQuery(searchVal + "*");
+		solrQuery.setQuery("(tagValue:(" + "*" + searchVal.toLowerCase() + "*"
+				+ ") AND " + "tagType:(" + searchField.toLowerCase() + ")) OR "
+				+ "(tagName:(" + "*" + searchVal.toLowerCase() + "*" + ") AND "
+				+ "tagType:(" + searchField.toLowerCase() + "))");
+		solrQuery.setFields(Constants.SOLR_TAG_NAME, Constants.SOLR_TAG_TYPE,
+				Constants.SOLR_TAG_VALUE);
+		// solrQuery.setFields("tagName","tagValue");
 
 		QueryResponse rsp = server.query(solrQuery, METHOD.POST);
 		System.out.println("query = " + solrQuery.toString());
@@ -78,8 +80,8 @@ public class SearchManagerImpl implements SearchHandler {
 	}
 
 	@Override
-	public void createTag(String tagName, String tagType, String tagValue, String id)
-			throws SolrServerException, IOException {
+	public void createTag(String tagName, String tagType, String tagValue,
+			String id) throws SolrServerException, IOException {
 		String solrUrl = env.getProperty(Constants.SOLR_URL);
 
 		HttpSolrClient server = new HttpSolrClient(solrUrl);
@@ -94,6 +96,81 @@ public class SearchManagerImpl implements SearchHandler {
 		server.commit();
 		server.close();
 
+	}
+
+	@Override
+	public void indexUser(Map<String, String> userMap)
+			throws SolrServerException, IOException {
+
+		String solrUrl = env.getProperty(Constants.SOLR_URL);
+
+		HttpSolrClient server = new HttpSolrClient(solrUrl);
+		SolrInputDocument tagdoc = new SolrInputDocument();
+
+		for (Map.Entry<String, String> entry : userMap.entrySet()) {
+			tagdoc.addField(entry.getKey().toLowerCase(), entry.getValue()
+					.toLowerCase());
+		}
+
+		tagdoc.addField(Constants.SOLR_TAG_NAME, userMap.get("name")
+				.toLowerCase());
+		tagdoc.addField(Constants.SOLR_TAG_TYPE, Constants.TAG_TYPE_USER);
+		tagdoc.addField(Constants.SOLR_TAG_VALUE, userMap.get("email")
+				.toLowerCase());
+		tagdoc.addField(Constants.TAG_TYPE_ID, userMap.get("emp_id")
+				.toLowerCase());
+
+		server.add(tagdoc);
+		server.commit();
+		server.close();
+
+	}
+
+	@Override
+	public void removeIndexForUser(Map<String, String> userMap)
+			throws SolrServerException, IOException {
+		String solrUrl = env.getProperty(Constants.SOLR_URL);
+		HttpSolrClient server = new HttpSolrClient(solrUrl);
+
+		SolrQuery solrQuery = new SolrQuery();
+		// solrQuery.setQuery(searchVal + "*");
+		/*
+		 * solrQuery .setQuery("(tagValue:(" + "*" +
+		 * userMap.get("email").toLowerCase() + "*" + ") AND " + "tagType:(" +
+		 * "user" + ") AND " + Constants.TAG_TYPE_ID + ":(" + userMap.get("") +
+		 * "))");
+		 */
+		solrQuery.setQuery("(email :" 
+				+ userMap.get("email").toLowerCase() + " AND " + "practices:" + userMap.get("practices").toLowerCase() + ")"); 
+				
+				/*AND " + "name:(" + userMap.get("name").toLowerCase() + ") AND " + Constants.SOLR_TAG_NAME + ":("+ userMap.get("name") + ") AND " + Constants.SOLR_TAG_TYPE + ":(" +  "user))");
+*/
+		solrQuery.setFields(Constants.SOLR_TAG_NAME, Constants.SOLR_TAG_TYPE,
+				Constants.SOLR_TAG_VALUE, "id");
+
+		QueryResponse rsp = server.query(solrQuery, METHOD.POST);
+
+		if (rsp != null && rsp.getResults().size() > 0) {
+			SolrDocumentList docsans = rsp.getResults();
+
+			for (SolrDocument userdoc : docsans) {
+
+				String id = userdoc.get("id").toString();
+				//System.out.println("id of employee :: " + id);
+				server.deleteById(id);
+				server.commit();
+				
+			}	
+		}
+		
+		
+		server.close();
+		
+		indexUser(userMap);
+
+		/*
+		 * server.commit(); server.close();
+		 */
 	}
 
 }

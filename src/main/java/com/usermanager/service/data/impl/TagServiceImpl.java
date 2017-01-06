@@ -3,7 +3,6 @@ package com.usermanager.service.data.impl;
 import java.io.IOException;
 
 import org.apache.solr.client.solrj.SolrServerException;
-import org.apache.solr.common.SolrDocumentList;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

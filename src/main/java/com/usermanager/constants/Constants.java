@@ -7,6 +7,9 @@ public class Constants {
 	public static final String TAG_TYPE_USER = "user";
 	public static final String TAG_TYPE_GROUP = "group";
 	public static final String TAG_TYPE_CATEGORY = "category";
-	public static final String TAG_TYPE_ID = "mongoTagId";
-
+	
+	public static final String TAG_TYPE_ID = "empId";
+	public static final String SOLR_TAG_NAME = "tagName";
+	public static final String SOLR_TAG_TYPE = "tagType";
+	public static final String SOLR_TAG_VALUE = "tagValue";
 }
