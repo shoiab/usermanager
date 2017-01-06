@@ -26,12 +26,12 @@ public class SchedulerServiceImpl implements SchedulerService{
 		
 		
 		
-		for(int i=0; i<userarr.size(); i++){
+		for(int i=0 ; i < userarr.size() ; i++){
 			Map<String, String> userMap = (Map) userarr.get(i);
 			//System.out.println("user map ::"+userMap);
 			
 			solrservice.removeIndexForUser(userMap);
-			
+			solrservice.indexUser(userMap);
 		}
 		
 	}

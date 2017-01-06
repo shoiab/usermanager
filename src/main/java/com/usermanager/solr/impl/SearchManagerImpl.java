@@ -131,15 +131,9 @@ public class SearchManagerImpl implements SearchHandler {
 			throws SolrServerException, IOException {
 		String solrUrl = env.getProperty(Constants.SOLR_URL);
 		HttpSolrClient server = new HttpSolrClient(solrUrl);
-
+		
 		SolrQuery solrQuery = new SolrQuery();
-		// solrQuery.setQuery(searchVal + "*");
-		/*
-		 * solrQuery .setQuery("(tagValue:(" + "*" +
-		 * userMap.get("email").toLowerCase() + "*" + ") AND " + "tagType:(" +
-		 * "user" + ") AND " + Constants.TAG_TYPE_ID + ":(" + userMap.get("") +
-		 * "))");
-		 */
+		
 		solrQuery.setQuery("(email :" 
 				+ userMap.get("email").toLowerCase() + " AND " + "practices:" + userMap.get("practices").toLowerCase() + ")"); 
 				
@@ -159,18 +153,10 @@ public class SearchManagerImpl implements SearchHandler {
 				//System.out.println("id of employee :: " + id);
 				server.deleteById(id);
 				server.commit();
-				
 			}	
 		}
 		
-		
 		server.close();
-		
-		indexUser(userMap);
-
-		/*
-		 * server.commit(); server.close();
-		 */
 	}
 
 }
