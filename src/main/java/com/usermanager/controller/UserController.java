@@ -2,6 +2,7 @@ package com.usermanager.controller;
 
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import org.apache.solr.client.solrj.SolrServerException;
@@ -29,7 +30,11 @@ public class UserController {
 	@RequestMapping(value = "/createUser", method = RequestMethod.POST)
 	public @ResponseBody JSONObject createUser(@RequestBody UserModel usermodel)
 			throws NoSuchAlgorithmException, SolrServerException, IOException {
-		usermodel.setDateOfCreation(new Date());
+		
+		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd kk:mm:ss");
+		
+		String currentDate = simpleDateFormat.format(new Date());
+		usermodel.setDateOfCreation(currentDate);
 		HttpStatus status = dataservice.saveUser(usermodel);
 		
 		JSONObject statusobj = new JSONObject();

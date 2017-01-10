@@ -1,7 +1,5 @@
 package com.usermanger.model;
 
-import java.util.Date;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 
@@ -10,7 +8,7 @@ public class UserModel{
 	private String id;
 	private String name;
 	private String email;
-	private Date dateOfCreation;
+	private String dateOfCreation;
 	private String password;
 	public UserModel(String name, String email) {
 		super();
@@ -42,12 +40,12 @@ public class UserModel{
 	}
 	
 	@JsonIgnore
-	public Date getDateOfCreation() {
+	public String getDateOfCreation() {
 		return dateOfCreation;
 	}
 	
 	@JsonIgnore
-	public void setDateOfCreation(Date dateOfCreation) {
+	public void setDateOfCreation(String dateOfCreation) {
 		this.dateOfCreation = dateOfCreation;
 	}
 	public String getPassword() {
