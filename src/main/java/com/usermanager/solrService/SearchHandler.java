@@ -1,4 +1,4 @@
-package com.usermanager.solr;
+package com.usermanager.solrService;
 
 import java.io.IOException;
 import java.util.Map;

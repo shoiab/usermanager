@@ -1,8 +1,9 @@
-package com.usermanager.solr.impl;
+package com.usermanager.solrService.impl;
 
 import java.io.IOException;
 import java.util.Map;
 
+import org.apache.log4j.Logger;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrRequest.METHOD;
 import org.apache.solr.client.solrj.SolrServerException;
@@ -15,22 +16,27 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 
+import com.usermanager.config.solrConfig;
 import com.usermanager.constants.Constants;
-import com.usermanager.solr.SearchHandler;
+import com.usermanager.solrService.SearchHandler;
 import com.usermanger.model.UserModel;
 
 @Service
 public class SearchManagerImpl implements SearchHandler {
+	
+	private static final Logger logger = Logger.getLogger(SearchManagerImpl.class.getName());
 
 	@Autowired
 	Environment env;
+	
+	@Autowired
+	private solrConfig solrconfig;
 
 	@Override
 	public void indexuser(UserModel usermodel) throws SolrServerException,
 			IOException {
-		String solrUrl = env.getProperty(Constants.SOLR_URL);
 
-		HttpSolrClient server = new HttpSolrClient(solrUrl);
+		HttpSolrClient server = solrconfig.getSolrClient();
 		SolrInputDocument userdoc = new SolrInputDocument();
 
 		userdoc.addField("userName", usermodel.getName());
@@ -38,15 +44,13 @@ public class SearchManagerImpl implements SearchHandler {
 
 		server.add(userdoc);
 		server.commit();
-		server.close();
 	}
 
 	@Override
 	public SolrDocumentList fetchTag(String searchVal, String searchField)
 			throws SolrServerException, IOException {
-		String solrUrl = env.getProperty(Constants.SOLR_URL);
-
-		HttpSolrClient server = new HttpSolrClient(solrUrl);
+		
+		HttpSolrClient server = solrconfig.getSolrClient();
 
 		SolrDocumentList docsans = new SolrDocumentList();
 		SolrQuery solrQuery = new SolrQuery();
@@ -60,11 +64,10 @@ public class SearchManagerImpl implements SearchHandler {
 		// solrQuery.setFields("tagName","tagValue");
 
 		QueryResponse rsp = server.query(solrQuery, METHOD.POST);
-		System.out.println("query = " + solrQuery.toString());
+		logger.info("query = " + solrQuery.toString());
 		docsans = rsp.getResults();
-		System.out.println(docsans);
-
-		server.close();
+		logger.info(docsans);
+		
 		return docsans;
 	}
 
@@ -72,19 +75,17 @@ public class SearchManagerImpl implements SearchHandler {
 	public void deleteTag(String fieldName, String fieldValue)
 			throws SolrServerException, IOException {
 
-		String solrUrl = env.getProperty(Constants.SOLR_URL);
-		HttpSolrClient server = new HttpSolrClient(solrUrl);
+		HttpSolrClient server = solrconfig.getSolrClient();
+		
 		server.deleteByQuery(fieldName + ":" + fieldValue);
 		server.commit();
-		server.close();
 	}
 
 	@Override
 	public void createTag(String tagName, String tagType, String tagValue,
 			String id) throws SolrServerException, IOException {
-		String solrUrl = env.getProperty(Constants.SOLR_URL);
 
-		HttpSolrClient server = new HttpSolrClient(solrUrl);
+		HttpSolrClient server = solrconfig.getSolrClient();
 		SolrInputDocument tagdoc = new SolrInputDocument();
 
 		tagdoc.addField("tagName", tagName);
@@ -94,17 +95,13 @@ public class SearchManagerImpl implements SearchHandler {
 
 		server.add(tagdoc);
 		server.commit();
-		server.close();
-
 	}
 
 	@Override
 	public void indexUser(Map<String, String> userMap)
 			throws SolrServerException, IOException {
 
-		String solrUrl = env.getProperty(Constants.SOLR_URL);
-
-		HttpSolrClient server = new HttpSolrClient(solrUrl);
+		HttpSolrClient server = solrconfig.getSolrClient();
 		SolrInputDocument tagdoc = new SolrInputDocument();
 
 		for (Map.Entry<String, String> entry : userMap.entrySet()) {
@@ -112,30 +109,28 @@ public class SearchManagerImpl implements SearchHandler {
 					.toLowerCase());
 		}
 
-		tagdoc.addField(Constants.SOLR_TAG_NAME, userMap.get("name")
+		tagdoc.addField(Constants.SOLR_TAG_NAME, userMap.get(Constants.EMP_NAME)
 				.toLowerCase());
 		tagdoc.addField(Constants.SOLR_TAG_TYPE, Constants.TAG_TYPE_USER);
-		tagdoc.addField(Constants.SOLR_TAG_VALUE, userMap.get("email")
+		tagdoc.addField(Constants.SOLR_TAG_VALUE, userMap.get(Constants.EMP_EMAIL)
 				.toLowerCase());
-		tagdoc.addField(Constants.TAG_TYPE_ID, userMap.get("emp_id")
-				.toLowerCase());
+		/*tagdoc.addField(Constants.TAG_TYPE_ID, userMap.get(Constants.EMP_ID)
+				.toLowerCase());*/
 
 		server.add(tagdoc);
 		server.commit();
-		server.close();
 
 	}
 
 	@Override
 	public void removeIndexForUser(Map<String, String> userMap)
 			throws SolrServerException, IOException {
-		String solrUrl = env.getProperty(Constants.SOLR_URL);
-		HttpSolrClient server = new HttpSolrClient(solrUrl);
 		
+		HttpSolrClient server = solrconfig.getSolrClient();	
 		SolrQuery solrQuery = new SolrQuery();
 		
 		solrQuery.setQuery("(email :" 
-				+ userMap.get("email").toLowerCase() + " AND " + "practices:" + userMap.get("practices").toLowerCase() + ")"); 
+				+ userMap.get(Constants.EMP_EMAIL).toLowerCase() + " AND " + "practices:" + userMap.get(Constants.EMP_PRACTICE).toLowerCase() + ")"); 
 				
 				/*AND " + "name:(" + userMap.get("name").toLowerCase() + ") AND " + Constants.SOLR_TAG_NAME + ":("+ userMap.get("name") + ") AND " + Constants.SOLR_TAG_TYPE + ":(" +  "user))");
 */
@@ -150,13 +145,10 @@ public class SearchManagerImpl implements SearchHandler {
 			for (SolrDocument userdoc : docsans) {
 
 				String id = userdoc.get("id").toString();
-				//System.out.println("id of employee :: " + id);
 				server.deleteById(id);
 				server.commit();
 			}	
 		}
-		
-		server.close();
 	}
 
 }

@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 import com.usermanager.constants.Constants;
 import com.usermanager.dbOperation.DbOperationService;
 import com.usermanager.service.data.CSVUserDataService;
-import com.usermanager.solr.SearchHandler;
+import com.usermanager.solrService.SearchHandler;
 import com.usermanager.utils.Encrypt;
 import com.usermanger.model.UserModel;
 

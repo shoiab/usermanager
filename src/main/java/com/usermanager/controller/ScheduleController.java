@@ -6,6 +6,7 @@ import java.net.URISyntaxException;
 
 import javax.inject.Inject;
 
+import org.apache.log4j.Logger;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
@@ -28,6 +29,8 @@ import com.usermanager.service.data.SchedulerService;
 @Configuration
 @EnableScheduling
 public class ScheduleController {
+	
+	static Logger logger = Logger.getLogger(ScheduleController.class.getName());
 
 	@Inject
 	private RestTemplate restTemplate;
@@ -42,7 +45,7 @@ public class ScheduleController {
 	@RequestMapping(value = "/getUsers", method = RequestMethod.GET)
 	public void userScheduler() throws URISyntaxException, SolrServerException, IOException {
 		
-		System.out.println("cron scheduler is on!");
+		logger.info("cron scheduler is on!");
 		
 		
 		URI url = new URI(env.getProperty("staging.fetchuser.url"));
@@ -58,7 +61,7 @@ public class ScheduleController {
 				HttpMethod.GET, request, String.class);
 		
 		schedulerservice.saveUsersToSolr(usersObj);
-		System.out.println("indexing finished");
+		logger.info("indexing finished");
 		
 	}
 
