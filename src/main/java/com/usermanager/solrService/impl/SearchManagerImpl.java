@@ -3,7 +3,6 @@ package com.usermanager.solrService.impl;
 import java.io.IOException;
 import java.util.Map;
 
-import org.apache.log4j.Logger;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrRequest.METHOD;
 import org.apache.solr.client.solrj.SolrServerException;
@@ -12,6 +11,8 @@ import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrInputDocument;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
@@ -24,7 +25,9 @@ import com.usermanger.model.UserModel;
 @Service
 public class SearchManagerImpl implements SearchHandler {
 	
-	private static final Logger logger = Logger.getLogger(SearchManagerImpl.class.getName());
+	private final Logger logger = LoggerFactory.getLogger(this.getClass());
+	
+	//private static final Logger logger = Logger.getLogger(SearchManagerImpl.class.getName());
 
 	@Autowired
 	Environment env;
@@ -66,7 +69,7 @@ public class SearchManagerImpl implements SearchHandler {
 		QueryResponse rsp = server.query(solrQuery, METHOD.POST);
 		logger.info("query = " + solrQuery.toString());
 		docsans = rsp.getResults();
-		logger.info(docsans);
+		logger.info(docsans.toString());
 		
 		return docsans;
 	}
@@ -95,6 +98,7 @@ public class SearchManagerImpl implements SearchHandler {
 
 		server.add(tagdoc);
 		server.commit();
+		logger.info("user tag created..");
 	}
 
 	@Override
